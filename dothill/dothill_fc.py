@@ -1,3 +1,4 @@
+#    Copyright 2014 Objectif Libre
 #    Copyright 2015 DotHill Systems
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -24,6 +25,22 @@ LOG = logging.getLogger(__name__)
 
 
 class DotHillFCDriver(cinder.volume.driver.FibreChannelDriver):
+    """Openstack Fibre Channel cinder drivers for DotHill Arrays.
+
+    Version history:
+        0.1    - Base version developed for HPMSA FC drivers:
+                    "https://github.com/openstack/cinder/tree/stable/juno/
+                     cinder/volume/drivers/san/hp"
+        1.0    - Version developed for DotHill arrays with the following
+                 modifications:
+                     - added support for v3 API(realstor feature)
+                     - added support for retype volume
+                     - added support for manage/unmanage volume
+                     - added initiator target mapping in FC zoning
+                     - added https support
+
+    """
+
     VERSION = "1.0"
 
     def __init__(self, *args, **kwargs):

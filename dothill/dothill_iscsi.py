@@ -1,3 +1,4 @@
+#    Copyright 2014 Objectif Libre
 #    Copyright 2015 DotHill Systems
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -27,6 +28,24 @@ LOG = logging.getLogger(__name__)
 
 
 class DotHillISCSIDriver(cinder.volume.driver.ISCSIDriver):
+    """Openstack iSCSI cinder drivers for DotHill Arrays.
+
+    Version history:
+        0.1    - Base structure for DotHill iSCSI drivers based on HPMSA FC
+                 drivers:
+                     "https://github.com/openstack/cinder/tree/stable/juno/
+                      cinder/volume/drivers/san/hp"
+        1.0    - Version developed for DotHill arrays with the following
+                 modifications:
+                     - added iSCSI support
+                     - added CHAP support in iSCSI
+                     - added support for v3 API(realstor feature)
+                     - added support for retype volume
+                     - added support for manage/unmanage volume
+                     - added https support
+
+    """
+
     VERSION = "1.0"
 
     def __init__(self, *args, **kwargs):
