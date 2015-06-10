@@ -496,8 +496,6 @@ class TestFCDotHillCommon(test.TestCase):
     @mock.patch.object(dothill.DotHillClient, 'modify_volume_name')
     def test_retype(self, mock_modify, mock_delete, mock_copy):
         mock_copy.side_effect = [exception.DotHillRequestError, None]
-        mock_modify.side_effect = None
-        mock_delete.side_effect = None
         self.assertRaises(exception.Invalid, self.common.migrate_volume,
                           test_retype_volume, test_host)
         ret = self.common.migrate_volume(test_retype_volume, test_host)
@@ -510,7 +508,6 @@ class TestFCDotHillCommon(test.TestCase):
     @mock.patch.object(dothill.DotHillClient, 'modify_volume_name')
     def test_manage_existing(self, mock_modify, mock_volume):
         existing_ref = {'source-name': 'xxxx'}
-        mock_volume.side_effect = None
         mock_modify.side_effect = [exception.DotHillRequestError, None]
         self.assertRaises(exception.Invalid, self.common.manage_existing,
                           test_volume, existing_ref)
