@@ -903,7 +903,18 @@ class XtremIOAlreadyMappedError(CinderException):
     message = _("Volume to Initiator Group mapping already exists")
 
 
-# DOTHILL
+# StorPool driver
+class StorPoolConfigurationMissing(CinderException):
+    message = _("Missing parameter %(param)s in the %(section)s section "
+                "of the /etc/storpool.conf file")
+
+
+class StorPoolConfigurationInvalid(CinderException):
+    message = _("Invalid parameter %(param)s in the %(section)s section "
+                "of the /etc/storpool.conf file: %(error)s")
+
+
+# DOTHILL drivers
 class DotHillInvalidBackend(CinderException):
     message = _("Backend doesn't exist (%(backend)s)")
 
