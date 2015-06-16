@@ -36,16 +36,16 @@ common_opt = [
                help="VDisk or Pool name to use for volume creation."),
     cfg.StrOpt('dothill_backend_type',
                choices=['linear', 'realstor'],
-               help="linear(for VDisk) or realstor(for Pool)"),
+               help="linear (for VDisk) or realstor (for Pool)."),
     cfg.StrOpt('dothill_wbi_protocol',
                choices=['http', 'https'],
-               help="DotHill web interface protocol"),
+               help="DotHill web interface protocol."),
 ]
 
 iscsi_opt = [
     cfg.ListOpt('dothill_iscsi_ips',
                 default=[],
-                help="List of target iSCSI addresses"),
+                help="List of comma separated target iSCSI IP addresses."),
 ]
 
 CONF = cfg.CONF
@@ -54,7 +54,7 @@ CONF.register_opts(iscsi_opt)
 
 
 class DotHillCommon(object):
-    VERSION = "0.1"
+    VERSION = "1.0"
 
     stats = {}
 
@@ -164,7 +164,8 @@ class DotHillCommon(object):
         # Use base64 to encode the volume name (UUID is too long for DotHill)
         volume_name = self._get_vol_name(volume['id'])
         volume_size = "%dGB" % volume['size']
-        LOG.debug("Create Volume %(display_name)s %(name)s %(id)s %(size)s",
+        LOG.debug("Create Volume having display_name: %(display_name)s "
+                  "name: %(name)s id: %(id)s size: %(size)s",
                   {'display_name': volume['display_name'],
                    'name': volume['name'],
                    'id': volume_name,
@@ -176,7 +177,7 @@ class DotHillCommon(object):
                                                  self.backend_type)
             return metadata
         except exception.DotHillRequestError as ex:
-            LOG.exception(_LE("Creation of volume %s failed"), volume['id'])
+            LOG.exception(_LE("Creation of volume %s failed."), volume['id'])
             raise exception.Invalid(ex)
 
         finally:
@@ -206,14 +207,14 @@ class DotHillCommon(object):
 
     def create_cloned_volume(self, volume, src_vref):
         if self.backend_type == "realstor" and self.backend_name in ["A", "B"]:
-            msg = _("Create volume from volume(clone) does not support "
+            msg = _("Create volume from volume(clone) does not have support "
                     "for virtual pool A and B.")
             LOG.error(msg)
             raise exception.InvalidInput(reason=msg)
         self.get_volume_stats(True)
         self._assert_enough_space_for_copy(volume['size'])
         self._assert_source_detached(src_vref)
-        LOG.debug("Cloning Volume %(source_id)s (%(dest_id)s)",
+        LOG.debug("Cloning Volume %(source_id)s to (%(dest_id)s)",
                   {'source_id': volume['source_volid'],
                    'dest_id': volume['id'], })
 
@@ -228,7 +229,7 @@ class DotHillCommon(object):
             self.client.copy_volume(orig_name, dest_name, 0, self.backend_name)
             return None
         except exception.DotHillRequestError as ex:
-            LOG.exception(_LE("Cloning of volume %s failed"),
+            LOG.exception(_LE("Cloning of volume %s failed."),
                           volume['source_volid'])
             raise exception.Invalid(ex)
         finally:
@@ -236,14 +237,15 @@ class DotHillCommon(object):
 
     def create_volume_from_snapshot(self, volume, snapshot):
         if self.backend_type == "realstor" and self.backend_name in ["A", "B"]:
-            msg = _('Create volume from snapshot does not support '
+            msg = _('Create volume from snapshot does not have support '
                     'for virtual pool A and B.')
             LOG.error(msg)
             raise exception.InvalidInput(reason=msg)
         self.get_volume_stats(True)
         self._assert_enough_space_for_copy(volume['size'])
-        LOG.debug("Creating Volume from snapshot %(source_id)s (%(dest_id)s)",
-                  {'source_id': snapshot['id'], 'dest_id': volume['id'], })
+        LOG.debug("Creating Volume from snapshot %(source_id)s to "
+                  "(%(dest_id)s)", {'source_id': snapshot['id'],
+                                    'dest_id': volume['id'], })
 
         orig_name = self._get_snap_name(snapshot['id'])
         dest_name = self._get_vol_name(volume['id'])
@@ -252,14 +254,14 @@ class DotHillCommon(object):
             self.client.copy_volume(orig_name, dest_name, 0, self.backend_name)
             return None
         except exception.DotHillRequestError as ex:
-            LOG.exception(_LE("Create volume failed from snapshot %s"),
+            LOG.exception(_LE("Create volume failed from snapshot: %s"),
                           snapshot['id'])
             raise exception.Invalid(ex)
         finally:
             self.client_logout()
 
     def delete_volume(self, volume):
-        LOG.debug("Deleting Volume %s", volume['id'])
+        LOG.debug("Deleting Volume: %s", volume['id'])
         if volume['name_id']:
             volume_name = self._get_vol_name(volume['name_id'])
         else:
@@ -269,10 +271,10 @@ class DotHillCommon(object):
         try:
             self.client.delete_volume(volume_name)
         except exception.DotHillRequestError as ex:
-            LOG.exception(_LE("Deletion of volume %s failed"), volume['id'])
             # if the volume wasn't found, ignore the error
             if 'The volume was not found on this system.' in ex:
                 return
+            LOG.exception(_LE("Deletion of volume %s failed."), volume['id'])
             raise exception.Invalid(ex)
         finally:
             self.client_logout()
@@ -311,7 +313,7 @@ class DotHillCommon(object):
                                           self.owner))
             pool['pool_name'] = self.backend_name
         except exception.DotHillRequestError:
-            err = (_("Unable to get stats for backend_name %s") %
+            err = (_("Unable to get stats for backend_name: %s") %
                    self.backend_name)
             LOG.exception(err)
             raise exception.Invalid(reason=err)
@@ -321,7 +323,7 @@ class DotHillCommon(object):
 
     def _assert_connector_ok(self, connector, connector_element):
         if not connector[connector_element]:
-            msg = _("Connector does not provide %s") % connector_element
+            msg = _("Connector does not provide: %s") % connector_element
             LOG.error(msg)
             raise exception.InvalidInput(reason=msg)
 
@@ -337,7 +339,7 @@ class DotHillCommon(object):
                                           connector_element)
             return data
         except exception.DotHillRequestError as ex:
-            LOG.exception(_LE("Error mapping volume %s"), volume_name)
+            LOG.exception(_LE("Error mapping volume: %s"), volume_name)
             raise exception.Invalid(ex)
 
     def unmap_volume(self, volume, connector, connector_element):
@@ -353,7 +355,7 @@ class DotHillCommon(object):
                                      connector,
                                      connector_element)
         except exception.DotHillRequestError as ex:
-            LOG.exception(_LE("Error unmapping volume %s"), volume_name)
+            LOG.exception(_LE("Error unmapping volume: %s"), volume_name)
             raise exception.Invalid(ex)
         finally:
             self.client_logout()
@@ -381,9 +383,9 @@ class DotHillCommon(object):
             raise exception.Invalid(ex)
 
     def create_snapshot(self, snapshot):
-        LOG.debug("Creating snapshot from %(volume_id)s (%(snap_id)s)",
-                  {'volume_id': snapshot['volume_id'],
-                   'snap_id': snapshot['id'], })
+        LOG.debug("Creating snapshot (%(snap_id)s) from %(volume_id)s)",
+                  {'snap_id': snapshot['id'],
+                   'volume_id': snapshot['volume_id'], })
         if snapshot['volume']['name_id']:
             vol_name = self._get_vol_name(snapshot['volume']['name_id'])
         else:
@@ -394,7 +396,7 @@ class DotHillCommon(object):
         try:
             self.client.create_snapshot(vol_name, snap_name)
         except exception.DotHillRequestError as ex:
-            LOG.exception(_LE("Creation of snapshot failed for volume %s"),
+            LOG.exception(_LE("Creation of snapshot failed for volume: %s"),
                           snapshot['volume_id'])
             raise exception.Invalid(ex)
         finally:
@@ -408,10 +410,10 @@ class DotHillCommon(object):
         try:
             self.client.delete_snapshot(snap_name)
         except exception.DotHillRequestError as ex:
-            LOG.exception(_LE("Deleting snapshot %s failed"), snapshot['id'])
             # if the volume wasn't found, ignore the error
             if 'The volume was not found on this system.' in ex:
                 return
+            LOG.exception(_LE("Deleting snapshot %s failed"), snapshot['id'])
             raise exception.Invalid(ex)
         finally:
             self.client_logout()
@@ -433,7 +435,7 @@ class DotHillCommon(object):
         try:
             self.client.extend_volume(volume_name, "%dGB" % growth_size)
         except exception.DotHillRequestError as ex:
-            LOG.exception(_LE("Extension of volume %s failed"), volume['id'])
+            LOG.exception(_LE("Extension of volume %s failed."), volume['id'])
             raise exception.Invalid(ex)
         finally:
             self.client_logout()
@@ -493,7 +495,7 @@ class DotHillCommon(object):
             self.client.modify_volume_name(dest_name, source_name)
             return (True, None)
         except exception.DotHillRequestError as ex:
-            LOG.exception(_LE("Error migrating volume %s"), source_name)
+            LOG.exception(_LE("Error migrating volume: %s"), source_name)
             raise exception.Invalid(ex)
         finally:
             self.client_logout()

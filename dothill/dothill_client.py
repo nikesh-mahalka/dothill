@@ -23,6 +23,7 @@ from lxml import etree
 from oslo_log import log as logging
 
 from cinder import exception
+from cinder.i18n import _LE
 
 LOG = logging.getLogger(__name__)
 
@@ -248,13 +249,13 @@ class DotHillClient(object):
                 progress = False
                 if status:
                     progress = True
-                    LOG.debug("Volume copy is in progress %s", status)
+                    LOG.debug("Volume copy is in progress: %s", status)
                 if not progress:
-                    LOG.debug("Volume copy completed %s", status)
+                    LOG.debug("Volume copy completed: %s", status)
                     break
             else:
                 if count >= 5:
-                    LOG.debug("Error in copying volume %s", src_name)
+                    LOG.error(_LE('Error in copying volume: %s'), src_name)
                     raise exception.DotHillRequestError
                     break
                 time.sleep(1)

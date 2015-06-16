@@ -80,7 +80,7 @@ class CinderException(Exception):
             except AttributeError:
                 pass
 
-        for k, v in self.kwargs.iteritems():
+        for k, v in self.kwargs.items():
             if isinstance(v, Exception):
                 self.kwargs[k] = six.text_type(v)
 
@@ -93,11 +93,11 @@ class CinderException(Exception):
                 # kwargs doesn't match a variable in the message
                 # log the issue and the kwargs
                 LOG.exception(_LE('Exception in string format operation'))
-                for name, value in kwargs.iteritems():
+                for name, value in kwargs.items():
                     LOG.error(_LE("%(name)s: %(value)s"),
                               {'name': name, 'value': value})
                 if CONF.fatal_exception_format_errors:
-                    raise exc_info[0], exc_info[1], exc_info[2]
+                    six.reraise(*exc_info)
                 # at least get the core message out if something happened
                 message = self.message
         elif isinstance(message, Exception):

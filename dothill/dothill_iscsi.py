@@ -79,7 +79,7 @@ class DotHillISCSIDriver(cinder.volume.driver.ISCSIDriver):
                 elif len(ip) == 2:
                     iscsi_ips.append([ip[0], ip[1]])
                 else:
-                    msg = _("Invalid IP address format '%s'") % ip_addr
+                    msg = _("Invalid IP address format: '%s'") % ip_addr
                     LOG.error(msg)
                     raise exception.InvalidInput(reason=(msg))
             self.iscsi_ips = iscsi_ips
@@ -177,7 +177,7 @@ class DotHillISCSIDriver(cinder.volume.driver.ISCSIDriver):
         if 12 <= len(chap_secret) <= 16:
             self.common.create_chap_record(initiator_name, chap_secret)
         else:
-            msg = _('chap secret should be 12-16 bytes')
+            msg = _('CHAP secret should be 12-16 bytes.')
             LOG.error(msg)
             raise exception.InvalidInput(reason=(msg))
         return chap_secret
